@@ -1,0 +1,126 @@
+@startuml
+
+class ChessGame {
+    - board: ChessBoard
+    - currentPlayer: Player
+    - gameOver: boolean
+    + start(): void
+    + movePiece(from: Square, to: Square): boolean
+    + isCheckmate(): boolean
+    + isStalemate(): boolean
+}
+
+class ChessBoard {
+    - squares: Square[8][8]
+    + initialize(): void
+    + movePiece(from: Square, to: Square): boolean
+    + isSquareOccupied(square: Square): boolean
+    + isEnPassantSquare(square: Square): boolean
+    + isCastlingMove(from: Square, to: Square): boolean
+    + isPromotionMove(from: Square, to: Square): boolean
+    + performEnPassantCapture(from: Square, to: Square): void
+    + performCastlingMove(from: Square, to: Square): void
+    + performPromotionMove(from: Square, to: Square, promotionPiece: Piece): void
+    + isCheck(): boolean
+    + isCheckmate(): boolean
+    + isStalemate(): boolean
+}
+
+class Square {
+    - file: File
+    - rank: Rank
+    + getFile(): File
+    + getRank(): Rank
+    + equals(square: Square): boolean
+}
+
+enum Color {
+    WHITE
+    BLACK
+}
+
+enum File {
+    A, B, C, D, E, F, G, H
+}
+
+enum Rank {
+    1, 2, 3, 4, 5, 6, 7, 8
+}
+
+abstract class Piece {
+    - color: Color
+    - hasMoved: boolean
+    + getColor(): Color
+    + hasMoved(): boolean
+    + canMoveTo(square: Square): boolean
+    + moveTo(square: Square): boolean
+}
+
+class Pawn {
+    + canMoveTo(square: Square): boolean
+    + moveTo(square: Square): boolean
+    + canPerformEnPassant(from: Square, to: Square): boolean
+}
+
+class Rook {
+    + canMoveTo(square: Square): boolean
+    + moveTo(square: Square): boolean
+}
+
+class Knight {
+    + canMoveTo(square: Square): boolean
+    + moveTo(square: Square): boolean
+}
+
+class Bishop {
+    + canMoveTo(square: Square): boolean
+    + moveTo(square: Square): boolean
+}
+
+class Queen {
+    + canMoveTo(square: Square): boolean
+    + moveTo(square: Square): boolean
+}
+
+class King {
+    + canMoveTo(square: Square): boolean
+    + moveTo(square: Square): boolean
+    + canPerformCastling(from: Square, to: Square): boolean
+}
+
+class Player {
+    - color: Color
+    - capturedPieces: Piece[]
+    + makeMove(board: ChessBoard, from: Square, to: Square): boolean
+}
+
+class Move {
+    - piece: Piece
+    - fromSquare: Square
+    - toSquare: Square
+    - isCapture: boolean
+    + execute(): void
+    + undo(): void
+}
+
+ChessGame --> ChessBoard: contains
+ChessGame --> Player: currentPlayer
+ChessBoard --> Square: has
+ChessBoard --> Piece: contains
+Square --> File
+Square --> Rank
+Piece --> Color
+Piece --> Square
+Pawn --> Piece
+Rook --> Piece
+Knight --> Piece
+Bishop --> Piece
+Queen --> Piece
+King --> Piece
+Player --> Color
+Player --> Piece: capturedPieces
+Move --> Piece: piece
+Move --> Square: fromSquare
+Move --> Square: toSquare
+
+@enduml

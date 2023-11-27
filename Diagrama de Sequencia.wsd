@@ -1,0 +1,71 @@
+@startuml
+
+participant Player
+participant ChessGame
+participant ChessBoard
+participant Piece
+participant Move
+
+autonumber
+
+Player -> ChessGame: start()
+activate ChessGame
+ChessGame -> ChessBoard: initialize()
+activate ChessBoard
+ChessBoard -> ChessGame: initialized
+deactivate ChessBoard
+ChessGame --> Player: ChessBoard initialized
+deactivate ChessGame
+
+loop Gaming
+    Player -> ChessGame: makeMove(board, fromSquare, toSquare)
+    activate ChessGame
+    ChessGame -> ChessBoard: movePiece(fromSquare, toSquare)
+    activate ChessBoard
+    ChessBoard -> Piece: canMoveTo(fromSquare, toSquare)
+    deactivate ChessBoard
+    alt isValidMove
+        activate Piece
+        Piece -> Move: moveTo(toSquare)
+        activate Move
+        Move --> Piece: execute()
+        deactivate Move
+        Piece -> ChessGame: hasMoved()
+        deactivate Piece
+        ChessGame -> ChessBoard: isCheck()
+        activate ChessBoard
+        alt isCheck
+            ChessBoard -> ChessGame: Check
+            break
+                ChessGame --> Player: Check
+            end
+        else isNotCheck
+            ChessGame -> ChessBoard: isCheckmate()
+            activate ChessBoard
+            alt isCheckmate
+                ChessBoard --> ChessGame: Checkmate
+                break
+                    ChessGame --> Player: Checkmate
+                end
+            else isNotCheckmate
+                ChessGame -> ChessBoard: isStalemate()
+                activate ChessBoard
+                alt isStalemate
+                    ChessBoard --> ChessGame: Stalemate
+                    break
+                        ChessGame --> Player: Stalemate
+                    end
+                else isNotStalemate
+                    ChessGame -> ChessGame: switchCurrentPlayer()
+                    ChessGame --> Player: Move Successful
+                end
+                deactivate ChessBoard
+            end
+        end
+    else isNotValidMove
+        Piece -> Player: isNotAValidMove
+        deactivate Piece
+    end
+    deactivate ChessGame
+end
+@enduml
