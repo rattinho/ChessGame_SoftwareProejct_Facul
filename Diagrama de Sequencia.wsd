@@ -1,4 +1,4 @@
-@startuml
+@startuml seq
 
 participant Player
 participant ChessGame
@@ -41,6 +41,7 @@ loop Gaming
         ChessGame -> ChessBoard: isCheckmate()
         deactivate ChessGame
         activate ChessBoard
+        ChessBoard -> ChessBoard: isCheckmate()
         alt isCheckmate
             ChessBoard --> ChessGame: Checkmate
             deactivate ChessBoard
@@ -52,6 +53,7 @@ loop Gaming
             ChessGame -> ChessBoard: isStalemate()
             deactivate ChessGame
             activate ChessBoard
+            ChessBoard -> ChessBoard: isStalemate()
             alt isStalemate
                 ChessBoard --> ChessGame: Stalemate
                 deactivate ChessBoard
@@ -63,18 +65,22 @@ loop Gaming
                 ChessGame -> ChessBoard: isCheck()
                 deactivate ChessGame
                 activate ChessBoard
-                ChessBoard -> ChessGame: Check
-                deactivate ChessBoard
-                activate ChessGame
-                ChessGame -> ChessGame: switchCurrentPlayer()
-                ChessGame --> Player: Move Successful
-                deactivate ChessGame
+                ChessBoard -> ChessBoard: isCheck()
+                alt isCheck
+                    ChessBoard -> ChessGame: Check
+                else isNotCheck
+                    activate ChessGame
+                    ChessBoard -> ChessGame: isNotCheck
+                    deactivate ChessBoard
+                    ChessGame -> ChessGame: switchCurrentPlayer()
+                    ChessGame --> Player: Move Successful
+                    deactivate ChessGame
+                end
+            else isNotValidMove
+                Piece -> Player: isNotAValidMove
+                deactivate Piece
             end
-        else isNotValidMove
-            Piece -> Player: isNotAValidMove
-            deactivate Piece
+            deactivate ChessGame
         end
-        deactivate ChessGame
     end
-end
-@enduml
+    @enduml

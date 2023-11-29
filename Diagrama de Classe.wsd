@@ -1,5 +1,5 @@
 
-@startuml
+@startuml classe
 
 class ChessGame {
     - board: ChessBoard
@@ -7,6 +7,7 @@ class ChessGame {
     - gameOver: boolean
     + start(): void
     + movePiece(from: Square, to: Square): Move
+    + isCheck(): boolean
     + isCheckmate(): boolean
     + isStalemate(): boolean
 }
