@@ -1,3 +1,4 @@
+
 @startuml
 
 class ChessGame {
@@ -5,13 +6,14 @@ class ChessGame {
     - currentPlayer: Player
     - gameOver: boolean
     + start(): void
-    + movePiece(from: Square, to: Square): boolean
+    + movePiece(from: Square, to: Square): Move
     + isCheckmate(): boolean
     + isStalemate(): boolean
 }
 
 class ChessBoard {
     - squares: Square[8][8]
+        - pieceFactory: ChessPieceFactory
     + initialize(): void
     + movePiece(from: Square, to: Square): boolean
     + isSquareOccupied(square: Square): boolean
@@ -21,6 +23,7 @@ class ChessBoard {
     + performEnPassantCapture(from: Square, to: Square): void
     + performCastlingMove(from: Square, to: Square): void
     + performPromotionMove(from: Square, to: Square, promotionPiece: Piece): void
+    + executeMove(move: Move): boolean
     + isCheck(): boolean
     + isCheckmate(): boolean
     + isStalemate(): boolean
@@ -50,6 +53,7 @@ enum Rank {
 abstract class Piece {
     - color: Color
     - hasMoved: boolean
+    - strategy: ChessPieceStrategy
     + getColor(): Color
     + hasMoved(): boolean
     + canMoveTo(square: Square): boolean
@@ -91,7 +95,7 @@ class King {
 class Player {
     - color: Color
     - capturedPieces: Piece[]
-    + makeMove(board: ChessBoard, from: Square, to: Square): boolean
+    + makeMove(board: ChessBoard, from: Square, to: Square): Move
 }
 
 class Move {
@@ -103,24 +107,71 @@ class Move {
     + undo(): void
 }
 
-ChessGame --> ChessBoard: contains
-ChessGame --> Player: currentPlayer
-ChessBoard --> Square: has
-ChessBoard --> Piece: contains
-Square --> File
-Square --> Rank
-Piece --> Color
-Piece --> Square
-Pawn --> Piece
-Rook --> Piece
-Knight --> Piece
-Bishop --> Piece
-Queen --> Piece
-King --> Piece
-Player --> Color
-Player --> Piece: capturedPieces
-Move --> Piece: piece
-Move --> Square: fromSquare
-Move --> Square: toSquare
+interface ChessPieceFactory {
+    + createPiece(pieceType: PieceType, color: Color): Piece
+}
+
+class ChessPieceFactoryImpl implements ChessPieceFactory {
+    + createPiece(pieceType: PieceType, color: Color): Piece
+}
+
+enum PieceType {
+    PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING
+}
+
+interface ChessPieceStrategy {
+    + canMoveTo(square: Square, board: ChessBoard): boolean
+}
+
+
+class PawnStrategy implements ChessPieceStrategy {
+    + canMoveTo(square: Square, board: ChessBoard): boolean
+}
+
+class RookStrategy implements ChessPieceStrategy {
+    + canMoveTo(square: Square, board: ChessBoard): boolean
+}
+
+class KnightStrategy implements ChessPieceStrategy {
+    + canMoveTo(square: Square, board: ChessBoard): boolean
+}
+
+class BishopStrategy implements ChessPieceStrategy {
+    + canMoveTo(square: Square, board: ChessBoard): boolean
+}
+
+class QueenStrategy implements ChessPieceStrategy {
+    + canMoveTo(square: Square, board: ChessBoard): boolean
+}
+
+class KingStrategy implements ChessPieceStrategy {
+    + canMoveTo(square: Square, board: ChessBoard): boolean
+}
+        
+ChessGame --> ChessBoard
+ChessGame --> Player
+ChessBoard --> Square
+ChessBoard --> Piece
+ChessBoard --> ChessPieceFactory
+ChessBoard --> ChessPieceStrategy
+Piece --> ChessPieceStrategy
+Piece --> Move
+Player --> ChessBoard
+Piece <|-- Pawn
+Piece <|-- Rook
+Piece <|-- Knight
+Piece <|-- Bishop
+Piece <|-- Queen
+Piece <|-- King
+Pawn --> PawnStrategy
+Rook --> RookStrategy
+Knight --> KnightStrategy
+Bishop --> BishopStrategy
+Queen --> QueenStrategy
+King --> KingStrategy
+Piece o--> ChessPieceStrategy
+Piece o--> Move
+
+Player "1" *-- "*" Piece
 
 @enduml
