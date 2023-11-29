@@ -11,9 +11,11 @@ autonumber
 Player -> ChessGame: start()
 activate ChessGame
 ChessGame -> ChessBoard: initialize()
+deactivate ChessGame
 activate ChessBoard
 ChessBoard -> ChessGame: initialized
 deactivate ChessBoard
+activate ChessGame
 ChessGame --> Player: ChessBoard initialized
 deactivate ChessGame
 
@@ -21,51 +23,58 @@ loop Gaming
     Player -> ChessGame: makeMove(board, fromSquare, toSquare)
     activate ChessGame
     ChessGame -> ChessBoard: movePiece(fromSquare, toSquare)
+    deactivate ChessGame
     activate ChessBoard
-    ChessBoard -> Piece: canMoveTo(fromSquare, toSquare)
+    ChessBoard -> Piece: movePiece(fromSquare, toSquare)
     deactivate ChessBoard
+    activate Piece
+    Piece -> Piece: canMoveTo(fromSquare, toSquare)
     alt isValidMove
-        activate Piece
         Piece -> Move: moveTo(toSquare)
+        deactivate Piece
         activate Move
         Move --> Piece: execute()
         deactivate Move
+        activate Piece
         Piece -> ChessGame: hasMoved()
-        deactivate Piece
-        ChessGame -> ChessBoard: isCheck()
+        activate ChessGame
+        ChessGame -> ChessBoard: isCheckmate()
+        deactivate ChessGame
         activate ChessBoard
-        alt isCheck
-            ChessBoard -> ChessGame: Check
+        alt isCheckmate
+            ChessBoard --> ChessGame: Checkmate
+            deactivate ChessBoard
+            activate ChessGame
             break
-                ChessGame --> Player: Check
+                ChessGame --> Player: Checkmate
             end
-        else isNotCheck
-            ChessGame -> ChessBoard: isCheckmate()
+        else isNotCheckmate
+            ChessGame -> ChessBoard: isStalemate()
+            deactivate ChessGame
             activate ChessBoard
-            alt isCheckmate
-                ChessBoard --> ChessGame: Checkmate
-                break
-                    ChessGame --> Player: Checkmate
-                end
-            else isNotCheckmate
-                ChessGame -> ChessBoard: isStalemate()
-                activate ChessBoard
-                alt isStalemate
-                    ChessBoard --> ChessGame: Stalemate
-                    break
-                        ChessGame --> Player: Stalemate
-                    end
-                else isNotStalemate
-                    ChessGame -> ChessGame: switchCurrentPlayer()
-                    ChessGame --> Player: Move Successful
-                end
+            alt isStalemate
+                ChessBoard --> ChessGame: Stalemate
                 deactivate ChessBoard
+                activate ChessGame
+                break
+                    ChessGame --> Player: Stalemate
+                end
+            else isNotStalemate
+                ChessGame -> ChessBoard: isCheck()
+                deactivate ChessGame
+                activate ChessBoard
+                ChessBoard -> ChessGame: Check
+                deactivate ChessBoard
+                activate ChessGame
+                ChessGame -> ChessGame: switchCurrentPlayer()
+                ChessGame --> Player: Move Successful
+                deactivate ChessGame
             end
+        else isNotValidMove
+            Piece -> Player: isNotAValidMove
+            deactivate Piece
         end
-    else isNotValidMove
-        Piece -> Player: isNotAValidMove
-        deactivate Piece
+        deactivate ChessGame
     end
-    deactivate ChessGame
 end
 @enduml
